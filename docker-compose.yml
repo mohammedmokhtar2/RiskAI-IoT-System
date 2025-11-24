@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  # SERVICE 1: Python Backend
+  backend:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./risk_ai.db:/app/risk_ai.db  # Persist the database file
+    networks:
+      - riskai-network
+
+  # SERVICE 2: React Frontend
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - riskai-network
+
+networks:
+  riskai-network:
+    driver: bridge
