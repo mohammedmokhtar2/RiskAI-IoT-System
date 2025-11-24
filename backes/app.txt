@@ -1,0 +1,135 @@
+import { useState, useEffect } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AlertTriangle, TrendingUp, Activity } from 'lucide-react';
+import './App.css';
+
+function App() {
+  const [data, setData] = useState({ temperature: 0, humidity: 0, co2: 0, aceton: 0 });
+  const [history, setHistory] = useState([]); // Stores data for the Chart
+  const [prediction, setPrediction] = useState("Stable"); // ML Prediction State
+  const [isCritical, setIsCritical] = useState(false);
+
+  // --- 1. SMART PREDICTION ENGINE (The "ML" Part) ---
+  const analyzeTrend = (historyData) => {
+    if (historyData.length < 5) return;
+
+    // Get last 5 CO2 readings
+    const recent = historyData.slice(-5);
+    const start = recent[0].co2;
+    const end = recent[recent.length - 1].co2;
+    const slope = end - start;
+
+    // PREDICTION LOGIC:
+    // If CO2 rises by more than 50 points in 10 seconds, PREDICT a leak.
+    if (end > 1000 || recent[recent.length - 1].aceton > 100) {
+        setPrediction("CRITICAL HAZARD PRESENT");
+        setIsCritical(true);
+    } else if (slope > 50) {
+        setPrediction("⚠️ WARNING: Levels Rising Rapidly! Leak Predicted.");
+        setIsCritical(true);
+    } else {
+        setPrediction("Environment Stable. No immediate risks predicted.");
+        setIsCritical(false);
+    }
+  };
+
+  // --- 2. DATA FETCHING ---
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch Current Data
+        const response = await fetch('http://127.0.0.1:5000/api/fetch-sensor');
+        const jsonData = await response.json();
+        setData(jsonData);
+
+        // Update History for Chart (Keep last 20 points)
+        setHistory(prev => {
+          const newHistory = [...prev, { time: new Date().toLocaleTimeString(), ...jsonData }];
+          const trimmedHistory = newHistory.slice(-20); 
+          analyzeTrend(trimmedHistory); // Run ML Analysis on new data
+          return trimmedHistory;
+        });
+
+      } catch (error) {
+        console.error("Connection Error:", error);
+      }
+    };
+
+    // Run immediately, then every 2 seconds
+    fetchData();
+    const interval = setInterval(fetchData, 2000);
+    return () => clearInterval(interval);
+  }, []); // Dependency array empty = runs once on mount
+
+  return (
+    <div className={`dashboard-container ${isCritical ? 'critical-bg' : ''}`}>
+      
+      {/* CRITICAL OVERLAY (The "Zooming" Warning) */}
+      {isCritical && (
+        <div className="critical-overlay">
+          <AlertTriangle size={80} className="zoom-icon" />
+          <h1 className="zoom-text">WARNING</h1>
+          <p>{prediction}</p>
+        </div>
+      )}
+
+      <header>
+        <h1>Risk AI Dashboard 🧠</h1>
+        <div className="status-badge">
+            <Activity size={18} /> System Online
+        </div>
+      </header>
+
+      {/* SENSOR CARDS */}
+      <div className="cards-grid">
+        <div className="card temp">
+          <h3>Temperature</h3>
+          <div className="value">{data.temperature}°C</div>
+        </div>
+        
+        <div className="card humidity">
+          <h3>Humidity</h3>
+          <div className="value">{data.humidity}%</div>
+        </div>
+
+        {/* CO2 CARD WITH LIVE STATUS */}
+        <div className={`card co2 ${data.co2 > 800 ? 'danger-border' : ''}`}>
+          <h3>Carbon Dioxide</h3>
+          <div className="value">{data.co2} <span className="unit">ppm</span></div>
+          {data.co2 > 800 && <small className="blink">High Levels!</small>}
+        </div>
+
+        <div className="card acetone">
+          <h3>Acetone</h3>
+          <div className="value">{data.aceton} <span className="unit">ppm</span></div>
+        </div>
+      </div>
+
+      {/* CHART SECTION */}
+      <div className="chart-section">
+        <div className="chart-header">
+            <h3><TrendingUp size={20}/> Live Environmental Trends</h3>
+            <p>Predictive Analysis: <strong>{prediction}</strong></p>
+        </div>
+        
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={history}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+              <XAxis dataKey="time" stroke="#888" fontSize={12} />
+              <YAxis stroke="#888" />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#333', border: 'none' }}
+                itemStyle={{ color: '#fff' }}
+              />
+              <Line type="monotone" dataKey="co2" stroke="#4cc9f0" strokeWidth={3} dot={false} name="CO2" />
+              <Line type="monotone" dataKey="aceton" stroke="#f72585" strokeWidth={3} dot={false} name="Acetone" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default App;
