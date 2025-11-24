@@ -21,4 +21,4 @@ npm run dev
 │   │   └── App.css        # Dark Mode Styling
 │   └── Dockerfile         # Frontend Container Config
 └── README.md              # Documentation
-👥 TeamHardware Engineer: [Your Name / Teammate Name]Software Engineer: Mohammed MokhtarBuilt with React, Flask, Recharts, and ESP32.
+👥 TeamHardware Engineer: Mohammd Mokhtar Software Engineer: Mohammed MokhtarBuilt with React, Flask, Recharts, and ESP32.s
