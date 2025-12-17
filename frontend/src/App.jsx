@@ -22,10 +22,10 @@ function App() {
     const end = recent[recent.length - 1].co2;
     const slope = end - recent[0].co2;
 
-    if (end > 1000 || recent[recent.length - 1].aceton > 100) {
+    if (end > 1000 || recent[recent.length - 1].aceton > 100 || recent[recent.length - 1].temperature > 30 ) { // zwdt el temp
         setPrediction("CRITICAL HAZARD PRESENT");
         setIsCritical(true);
-    } else if (slope > 50) {
+    } else if (slope > 50) { // 3dl el slop for temp bs atakd mn el calculations
         setPrediction("⚠️ WARNING: Levels Rising Rapidly! Leak Predicted.");
         setIsCritical(true);
     } else {
