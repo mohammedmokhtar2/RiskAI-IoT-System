@@ -20,15 +20,29 @@ Risk AI is a real-time IoT and AI-powered dashboard designed to predict industri
 
 **Microcontroller:** ESP32 (NodeMCU / Wemos)
 
+
 **Sensors:**
 
 - DHT11 (Temperature & Humidity)
 - MQ-135 (Air Quality / Gas)
 
+**Actuators:**  
+
+- Relay
+- WaterPump
+- Buzzer
+- Servo motor
+
 **Wiring:**
 
 - DHT11 Data → Pin D4
+- DHT11 VCC → Pin 3V3
 - MQ-135 Analog → Pin D34
+- Servo → Pin D27
+- waterpump → red → NC , Black → VCC powersupply
+- Relay "in" → Pin D26 , GND → GND ESP , VR → 5V ESP , COM → common groung , NC → Pump
+- Buzzer → Pin D18 , small leg → ground 
+
 
 ---
 
@@ -132,8 +146,9 @@ RiskAI/
 
 ## 👥 Developers
 
-- **Hardware Engineer:** Mohammed Mokhtar
-- **Software Engineer:** Mohammed Mokhtar
+- **Hardware Engineer:** Hossam Mostafa
+- **Software Engineer:** Mohammed Mokhtar , Eyad Rezk , Tarek shereen , Amr Khaled
+
 
 Built with **React, Flask, Recharts, and ESP32**.
 
