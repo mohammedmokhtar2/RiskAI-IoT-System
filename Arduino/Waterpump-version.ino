@@ -232,7 +232,7 @@ void setup() {
   // Servo
   myServo.setPeriodHertz(50);
   myServo.attach(SERVO_PIN, 500, 2400);
-  myServo.write(0); 
+  myServo.write(90); 
 
   // 2. Configure WiFi
   Serial.print("Setting up Access Point...");
@@ -294,10 +294,10 @@ void readSensors() {
 void checkThresholds() {
   // --- RISK SCENARIO (Acetone High) ---
   if(acetone > 100) {
-    myServo.write(90);             // Open Hatch/Vent
+    myServo.write(0);             // Open Hatch/Vent
     digitalWrite(BUZZER_PIN, HIGH); // <--- NEW: Alarm ON
   } else {
-    myServo.write(0);              // Close Hatch/Vent
+    myServo.write(90);              // Close Hatch/Vent
     digitalWrite(BUZZER_PIN, LOW);  // <--- NEW: Alarm OFF
   }
 
